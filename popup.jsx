@@ -1,7 +1,7 @@
 // popup.js
 import React, { useState } from "react";
-import LoginPage from "./pages/login/Login";
-import HomePage from "./pages/Home";
+import SignIn from "./pages/SignIn";
+import Home from "./pages/Home"; // Assuming you have a HomePage component
 
 const IndexPopup = () => {
   const [currentPage, setCurrentPage] = useState("login");
@@ -9,15 +9,23 @@ const IndexPopup = () => {
   const renderPage = () => {
     switch (currentPage) {
       case "login":
-        return <LoginPage onLoginSuccess={() => setCurrentPage("home")} />;
+        return (
+          <SignIn
+            onLoginSuccess={() => setCurrentPage("home")}
+          />
+        );
       case "home":
-        return <HomePage />;
+        return <Home/>;
       default:
-        return <LoginPage onLoginSuccess={() => setCurrentPage("home")} />;
+        return (
+          <SignIn
+            onLoginSuccess={() => setCurrentPage("home")}
+          />
+        );
     }
   };
 
-  return <div style={{ padding: 16 }}>{renderPage()}</div>;
+  return <div>{renderPage()}</div>;
 };
 
 export default IndexPopup;
