@@ -18,7 +18,8 @@ const Home = () => {
       setErrors(newErrors);
     } else {
       setLoading(true);
-      // Simulate an API call
+      // **call the API to get the data here and set the data to the state**
+      // currently waits 2 seconds to simulate call
       setTimeout(() => {
         console.log('Item Description:', itemDescription);
         console.log('Price Range:', `${priceRangeMin} - ${priceRangeMax}`);
