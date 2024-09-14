@@ -1,15 +1,28 @@
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { Oval } from "react-loader-spinner"
 
 import Listings from "./Listings"
 
-const Home = () => {
+const Home = ({ onLogout }) => {
   const [itemDescription, setItemDescription] = useState("")
   const [priceRangeMin, setPriceRangeMin] = useState("")
   const [priceRangeMax, setPriceRangeMax] = useState("")
   const [loading, setLoading] = useState(false)
   const [errors, setErrors] = useState({})
   const [showListings, setShowListings] = useState(false)
+  const [user, setUser] = useState(null)
+
+  console.log("User:", user)
+  useEffect(() => {
+    const fetchUser = async () => {
+      const {
+        data: { user }
+      } = await supabase.auth.getUser()
+      setUser(user)
+    }
+
+    fetchUser()
+  }, [])
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -129,6 +142,23 @@ const Home = () => {
           }}>
           Start
         </button>
+        <button
+          onClick={onLogout}
+          style={{
+            position: "absolute",
+            top: "10px",
+            right: "10px",
+            background: "none",
+            border: "none",
+            color: "#4CAF50",
+            textDecoration: "underline",
+            cursor: "pointer",
+            padding: 0,
+            fontSize: "14px",
+            fontFamily: "inherit"
+          }}>
+          Logout
+        </button>
       </form>
 
       {loading && (
@@ -141,7 +171,7 @@ const Home = () => {
             ariaLabel="oval-loading"
             secondaryColor="#f3f3f3"
             strokeWidth={5}
-            wrapperStyle={{ display: 'flex', justifyContent: 'center' }}
+            wrapperStyle={{ display: "flex", justifyContent: "center" }}
             strokeWidthSecondary={5}
           />
         </div>
