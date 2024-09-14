@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Listings from './Listings';
 
 const Home = () => {
   const [itemDescription, setItemDescription] = useState('');
@@ -24,7 +25,7 @@ const Home = () => {
         console.log('Item Description:', itemDescription);
         console.log('Price Range:', `${priceRangeMin} - ${priceRangeMax}`);
         setLoading(false);
-      }, 2000);
+      }, 1000);
     }
   };
 
@@ -69,8 +70,9 @@ const Home = () => {
           {errors.priceRangeMax && <span style={{ color: 'red' }}>X</span>}
         </div>
         <button type="submit" style={{ width: '100%', padding: '10px', backgroundColor: '#4CAF50', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
-          {loading ? <span>Loading...</span> : 'Start!'}
+          {loading ? <span>Loading...</span> : "start"}
         </button>
+        <Listings />
       </form>
     </div>
   );
