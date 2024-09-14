@@ -20,7 +20,11 @@
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-loader-spinner": "^6.1.6",
+<<<<<<< Updated upstream
     "supabase": "^1.192.5"
+=======
+    "react-router-dom": "^6.26.2"
+>>>>>>> Stashed changes
   },
   "devDependencies": {
     "@ianvs/prettier-plugin-sort-imports": "4.1.1",
