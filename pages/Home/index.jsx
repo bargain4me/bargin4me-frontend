@@ -3,7 +3,7 @@ import { Oval } from "react-loader-spinner"
 
 import Listings from "./Listings"
 
-const Home = ({ onLogout }) => {
+const Home = ({ onLogout, onViewListing }) => {
   const [itemDescription, setItemDescription] = useState("")
   const [priceRangeMin, setPriceRangeMin] = useState("")
   const [priceRangeMax, setPriceRangeMax] = useState("")
@@ -44,7 +44,7 @@ const Home = ({ onLogout }) => {
         console.log("Price Range:", `${priceRangeMin} - ${priceRangeMax}`)
         setLoading(false)
         setShowListings(true)
-      }, 2000)
+      }, 1000)
     }
   }
 
@@ -179,7 +179,7 @@ const Home = ({ onLogout }) => {
 
       {showListings && (
         <div style={{ marginTop: "20px" }}>
-          <Listings />
+          <Listings onViewListing={onViewListing} />
         </div>
       )}
     </div>

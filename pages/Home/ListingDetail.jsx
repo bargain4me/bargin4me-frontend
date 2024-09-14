@@ -1,28 +1,30 @@
 import React from 'react';
-import { useLocation } from 'react-router-dom';
 
-const ListingDetail = () => {
-  const location = useLocation();
-  const { summary, message } = location.state;
-
+const ListingDetail = ({ onBack, summary, message, listedPrice, estimatePrice, image }) => {
   return (
-    <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif' }}>
-      <h1>Listing Detail</h1>
-      <p><strong>Summary:</strong> {summary}</p>
-      <p><strong>Initial Message:</strong> {message}</p>
+    <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif', position: 'relative' }}>
       <button
+        onClick={onBack}
         style={{
-          padding: '10px 20px',
-          backgroundColor: '#4CAF50',
-          color: 'white',
+          position: 'absolute',  // Positioned absolutely within the container
+          top: '10px',  // 10px from the top
+          right: '10px',  // 10px from the right
+          background: 'none',
           border: 'none',
-          borderRadius: '5px',
-          cursor: 'pointer'
+          color: '#4CAF50',
+          textDecoration: 'underline',
+          cursor: 'pointer',
+          padding: 0,
+          fontSize: '14px',
+          fontFamily: 'inherit'
         }}
-        onClick={() => alert('Let\'s Bargain!')}
       >
-        Let's Bargain
+        Back to Listings
       </button>
+      <div style={{ textAlign: 'center', marginTop: '40px' }}> {/* Added marginTop to prevent content overlap */}
+        <p><strong>Summary:</strong> {summary}</p>
+        <p><strong>Message:</strong> {message}</p>
+      </div>
     </div>
   );
 };
