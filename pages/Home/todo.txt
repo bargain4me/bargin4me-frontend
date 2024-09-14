@@ -1,0 +1,3 @@
+ * create dummy json which inscludes image price, and summary, message. url
+ *2 button image prices
+ * another page for the listing 
