@@ -1,6 +1,6 @@
 // popup.js
 import React, { useState } from "react";
-import LoginPage from "./pages/Login";
+import LoginPage from "./pages/login/Login";
 import HomePage from "./pages/Home";
 
 const IndexPopup = () => {
