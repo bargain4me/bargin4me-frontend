@@ -4,12 +4,27 @@ const Home = () => {
   const [itemDescription, setItemDescription] = useState('');
   const [priceRangeMin, setPriceRangeMin] = useState('');
   const [priceRangeMax, setPriceRangeMax] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({});
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Handle form submission logic here
-    console.log('Item Description:', itemDescription);
-    console.log('Price Range:', `${priceRangeMin} - ${priceRangeMax}`);
+    const newErrors = {};
+    if (!itemDescription) newErrors.itemDescription = true;
+    if (!priceRangeMin) newErrors.priceRangeMin = true;
+    if (!priceRangeMax) newErrors.priceRangeMax = true;
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+    } else {
+      setLoading(true);
+      // Simulate an API call
+      setTimeout(() => {
+        console.log('Item Description:', itemDescription);
+        console.log('Price Range:', `${priceRangeMin} - ${priceRangeMax}`);
+        setLoading(false);
+      }, 2000);
+    }
   };
 
   return (
@@ -26,6 +41,7 @@ const Home = () => {
             onChange={(e) => setItemDescription(e.target.value)}
             style={{ width: '100%', padding: '8px', boxSizing: 'border-box', borderRadius: '4px', border: '1px solid #ccc' }}
           />
+          {errors.itemDescription && <span style={{ color: 'red' }}>X</span>}
         </div>
         <div style={{ marginBottom: '15px' }}>
           <label style={{ display: 'block', marginBottom: '5px' }}>
@@ -48,9 +64,11 @@ const Home = () => {
               style={{ width: '45%', padding: '8px', boxSizing: 'border-box', borderRadius: '4px', border: '1px solid #ccc', marginLeft: '10px' }}
             />
           </div>
+          {errors.priceRangeMin && <span style={{ color: 'red' }}>X</span>}
+          {errors.priceRangeMax && <span style={{ color: 'red' }}>X</span>}
         </div>
         <button type="submit" style={{ width: '100%', padding: '10px', backgroundColor: '#4CAF50', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
-          Start!
+          {loading ? <span>Loading...</span> : 'Start!'}
         </button>
       </form>
     </div>
