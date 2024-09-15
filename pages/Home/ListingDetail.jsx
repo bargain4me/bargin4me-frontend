@@ -1,29 +1,46 @@
-import React from 'react';
+import React from "react"
 
-const ListingDetail = ({ onBack, summary, message, listedPrice, estimatePrice, image }) => {
+const ListingDetail = ({
+  onBack,
+  summary,
+  message,
+  listedPrice,
+  estimatePrice,
+  image
+}) => {
   return (
-    <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif', position: 'relative' }}>
+    <div
+      style={{
+        padding: "20px",
+        fontFamily: "Arial, sans-serif",
+        position: "relative"
+      }}>
       <button
         onClick={onBack}
         style={{
-          position: 'absolute',  // Positioned absolutely within the container
-          top: '10px',  // 10px from the top
-          right: '10px',  // 10px from the right
-          background: 'none',
-          border: 'none',
-          color: '#4CAF50',
-          textDecoration: 'underline',
-          cursor: 'pointer',
+          position: "absolute", // Positioned absolutely within the container
+          top: "10px", // 10px from the top
+          right: "10px", // 10px from the right
+          background: "none",
+          border: "none",
+          color: "#4CAF50",
+          textDecoration: "underline",
+          cursor: "pointer",
           padding: 0,
-          fontSize: '14px',
-          fontFamily: 'inherit'
-        }}
-      >
+          fontSize: "14px",
+          fontFamily: "inherit"
+        }}>
         Back to Listings
       </button>
-      <div style={{ textAlign: 'center', marginTop: '40px' }}> {/* Added marginTop to prevent content overlap */}
-        <p><strong>Summary:</strong> {summary}</p>
-        <p><strong>Message:</strong> {message}</p>
+      <div style={{ textAlign: "center", marginTop: "40px" }}>
+        {" "}
+        {/* Added marginTop to prevent content overlap */}
+        <p>
+          <strong>Summary:</strong> {summary}
+        </p>
+        <p>
+          <strong>Message:</strong> {message}
+        </p>
       </div>
       <button
         onClick={() => alert('Bargain for me!')}
@@ -43,7 +60,7 @@ const ListingDetail = ({ onBack, summary, message, listedPrice, estimatePrice, i
         Bargain for me!
       </button>
     </div>
-  );
-};
+  )
+}
 
-export default ListingDetail;
+export default ListingDetail

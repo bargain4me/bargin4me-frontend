@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import {fetchItemData} from '../apis';
 
 const Listings = ({ onViewListing }) => {
   const dummyData = [
@@ -30,6 +31,21 @@ const Listings = ({ onViewListing }) => {
       url: 'https://www.facebook.com/marketplace/item/3'
     },
   ];
+
+  // State to store the fetched data
+  const [items, setItems] = useState([]);
+
+  useEffect(() => {
+    // Fetch item data when the component mounts
+    fetchItemData()
+      .then(data => {
+        if (data) {
+          // Assume 'data' is an array of items or has a specific structure you can access
+          setItems(data); // Update the state with the fetched data
+        }
+      })
+      .catch(error => console.error('Error fetching items:', error));
+  }, []);
 
   return (
     <div style={{ height: '100vh', overflowY: 'scroll', padding: '20px', fontFamily: 'Arial, sans-serif' }}>

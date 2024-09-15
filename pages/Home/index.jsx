@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react"
+import React, { useEffect, useState } from "react"
 import { Oval } from "react-loader-spinner"
-
+import { supabase } from "../../supabaseClient"
+import { searchItem } from "../apis"
 import Listings from "./Listings"
 
 const Home = ({ onLogout, onViewListing }) => {
@@ -24,7 +25,7 @@ const Home = ({ onLogout, onViewListing }) => {
     fetchUser()
   }, [])
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     const newErrors = {}
     if (!itemDescription) newErrors.itemDescription = true
@@ -37,14 +38,21 @@ const Home = ({ onLogout, onViewListing }) => {
       setErrors({})
       setLoading(true)
       setShowListings(false) // Hide listings when a new search is initiated
-      // Simulate API call
-      setTimeout(() => {
-        // Here you would normally handle the API response
-        console.log("Item Description:", itemDescription)
-        console.log("Price Range:", `${priceRangeMin} - ${priceRangeMax}`)
-        setLoading(false)
-        setShowListings(true)
-      }, 1000)
+
+      // Call the searchItem function and pass the required parameters
+      const results = await searchItem(
+        user.id,
+        itemDescription,
+        priceRangeMin,
+        priceRangeMax
+      )
+
+      if (results) {
+        setListings(results) // Set the search results in state
+        setShowListings(true) // Show listings after search is complete
+      }
+
+      setLoading(false)
     }
   }
 
