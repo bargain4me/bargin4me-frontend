@@ -1,19 +1,20 @@
 import React, { useEffect, useState } from "react"
 import { Oval } from "react-loader-spinner"
+
+import { sendToBackground } from "@plasmohq/messaging"
+
 import { supabase } from "../../supabaseClient"
-import { searchItem } from "../apis"
 import Listings from "./Listings"
 
 const Home = ({ onLogout, onViewListing }) => {
-  const [itemDescription, setItemDescription] = useState("")
-  const [priceRangeMin, setPriceRangeMin] = useState("")
-  const [priceRangeMax, setPriceRangeMax] = useState("")
+  const [itemDescription, setItemDescription] = useState("macbook")
+  const [priceRangeMin, setPriceRangeMin] = useState("100")
+  const [priceRangeMax, setPriceRangeMax] = useState("200")
   const [loading, setLoading] = useState(false)
   const [errors, setErrors] = useState({})
-  const [showListings, setShowListings] = useState(false)
+  const [listings, setListings] = useState(undefined) // Add listings state
   const [user, setUser] = useState(null)
 
-  console.log("User:", user)
   useEffect(() => {
     const fetchUser = async () => {
       const {
@@ -24,6 +25,19 @@ const Home = ({ onLogout, onViewListing }) => {
 
     fetchUser()
   }, [])
+
+  const startAgent = async () => {
+    const message = await sendToBackground({
+      name: "start-agent",
+      body: {
+        itemDescription,
+        priceRangeMin,
+        priceRangeMax
+      }
+    })
+    console.log(message.data)
+    return message.data
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -37,19 +51,13 @@ const Home = ({ onLogout, onViewListing }) => {
     } else {
       setErrors({})
       setLoading(true)
-      setShowListings(false) // Hide listings when a new search is initiated
+      setListings(undefined) // Hide listings when a new search is initiated
 
-      // Call the searchItem function and pass the required parameters
-      const results = await searchItem(
-        user.id,
-        itemDescription,
-        priceRangeMin,
-        priceRangeMax
-      )
+      // Good listings returned from agent
+      const results = await startAgent()
 
       if (results) {
         setListings(results) // Set the search results in state
-        setShowListings(true) // Show listings after search is complete
       }
 
       setLoading(false)
@@ -185,7 +193,7 @@ const Home = ({ onLogout, onViewListing }) => {
         </div>
       )}
 
-      {showListings && (
+      {listings && (
         <div style={{ marginTop: "20px" }}>
           <Listings onViewListing={onViewListing} />
         </div>

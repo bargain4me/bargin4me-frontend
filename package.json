@@ -35,6 +35,14 @@
   "manifest": {
     "host_permissions": [
       "https://*/*"
+    ],
+    "permissions": [
+      "tabs",
+      "scripting",
+      "activeTab",
+      "pageCapture",
+      "downloads",
+      "webNavigation"
     ]
   }
 }
