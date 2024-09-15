@@ -33,23 +33,22 @@ async function searchItem(
 ) {
 
     console.log("searchItems: ", userId, itemDescription, priceRangeMin, priceRangeMax)
-  try {
-    const response = await fetch(
-      "https://d53503de-4a3d-4eb2-840a-bda4b5fea6e4-00-mpqny06oapwx.spock.replit.dev/searchItem",
-      {
-        method: "POST", // Use POST method for sending data
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          // Convert data to JSON format
-          userId,
-          itemDescription,
-          priceRangeMin,
-          priceRangeMax
-        })
-      }
-    )
+    try {
+      const response = await fetch(
+        "https://d53503de-4a3d-4eb2-840a-bda4b5fea6e4-00-mpqny06oapwx.spock.replit.dev/searchItems",
+        {
+          method: "POST", // Use POST method for sending data
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            userid: userId, // Assuming the id is the userId
+            searchitem: itemDescription, // The item description
+            minprice: priceRangeMin, // Minimum price
+            maxprice: priceRangeMax // Maximum price
+          })
+        }
+      );
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`)
