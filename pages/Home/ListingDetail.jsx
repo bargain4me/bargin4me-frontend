@@ -43,19 +43,20 @@ const ListingDetail = ({
         </p>
       </div>
       <button
-        onClick={() => alert("Bargain for me!")}
+        onClick={() => alert('Bargain for me!')}
         style={{
-          display: "block",
-          margin: "20px auto",
-          padding: "10px 20px",
-          backgroundColor: "#4CAF50",
-          color: "white",
-          border: "none",
-          borderRadius: "5px",
-          cursor: "pointer",
-          fontSize: "16px",
-          fontFamily: "inherit"
-        }}>
+          display: 'block',
+          margin: '20px auto',
+          padding: '10px 20px',
+          backgroundColor: '#4CAF50',
+          color: 'white',
+          border: 'none',
+          borderRadius: '5px',
+          cursor: 'pointer',
+          fontSize: '16px',
+          fontFamily: 'inherit'
+        }}
+      >
         Bargain for me!
       </button>
     </div>
