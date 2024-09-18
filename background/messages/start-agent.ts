@@ -1,31 +1,23 @@
 import { log } from "console"
+import { OpenAI } from "openai"
 
-import { sendToContentScript, type PlasmoMessaging } from "@plasmohq/messaging"
+import type { PlasmoMessaging } from "@plasmohq/messaging"
+
+import { chatWithAI, rankItems } from "~pages/apis"
 
 import { DendriteClient } from "../../dendriteClient"
 import type { GetElementResponse, PageInformation } from "../../dendriteClient"
+import { anthropicApiKey, openaiApiKey } from "../../secrets"
 
 class Tab {
   private _tabId: number
   private _dendriteClient: DendriteClient
-  private openaiApiKey: string
-  private anthropicApiKey: string
   private _stop: boolean = false // Add stop flag
 
-  constructor(
-    tabId: number,
-    dendriteApiKey: string,
-    openaiApiKey: string,
-    anthropicApiKey: string
-  ) {
+  constructor(tabId: number) {
     console.log("Initializing Tab with tabId:", tabId)
     this._tabId = tabId
-    this._dendriteClient = new DendriteClient(
-      "http://localhost:8000/api/v1",
-      dendriteApiKey
-    )
-    this.openaiApiKey = openaiApiKey
-    this.anthropicApiKey = anthropicApiKey
+    this._dendriteClient = new DendriteClient("http://localhost:8000/api/v1")
   }
 
   // Method to stop the agent
@@ -251,8 +243,8 @@ class Tab {
       await this._dendriteClient.getInteractionsSelector({
         page_information: pageInfo,
         llm_config: {
-          openai_api_key: this.openaiApiKey,
-          anthropic_api_key: this.anthropicApiKey
+          openai_api_key: openaiApiKey,
+          anthropic_api_key: anthropicApiKey
         },
         prompt,
         use_cache: true,
@@ -263,7 +255,7 @@ class Tab {
   }
 
   async click(prompt: string, expectedOutcome?: string): Promise<any> {
-    if (this._stop) throw new Error("Agent stopped") // Check stop flag
+    if (this._stop) throw new Error("Agent stopped")
     console.log("Click action with prompt:", prompt)
     const elementResponse = await this.get_element(prompt)
     if (elementResponse.selectors && elementResponse.selectors.length >= 1) {
@@ -271,10 +263,63 @@ class Tab {
         target: { tabId: this._tabId },
         func: (selector) => {
           console.log("Executing click script for selector:", selector)
-          const element = document.querySelector(selector)
+          const element = document.querySelector(selector) as HTMLElement
           if (element) {
-            console.log("Element found, clicking")
-            element.dispatchEvent(new MouseEvent("click"))
+            console.log("Element found, emulating click")
+
+            // Function to dispatch mouse events
+            const dispatchMouseEvent = (
+              type,
+              bubbles = true,
+              cancelable = true
+            ) => {
+              const evt = new MouseEvent(type, {
+                bubbles,
+                cancelable,
+                view: window,
+                detail: 1, // number of clicks
+                screenX: 0, // these coordinates
+                screenY: 0, // can be randomized
+                clientX: 0, // for more realism
+                clientY: 0,
+                ctrlKey: false,
+                altKey: false,
+                shiftKey: false,
+                metaKey: false,
+                button: 0, // main button pressed
+                relatedTarget: null
+              })
+              element.dispatchEvent(evt)
+            }
+
+            // Emulate mouse interaction
+            element.focus()
+            dispatchMouseEvent("mouseover")
+            dispatchMouseEvent("mouseenter", false)
+            dispatchMouseEvent("mousemove")
+            dispatchMouseEvent("mousedown")
+            dispatchMouseEvent("mouseup")
+            dispatchMouseEvent("click")
+
+            // Trigger any onclick handlers
+            if (typeof element.onclick === "function") {
+              element.onclick(new MouseEvent("click"))
+            }
+
+            // If it's an <a> tag, consider navigating
+            if (element.tagName.toLowerCase() === "a" && "href" in element) {
+              window.location.href = (element as HTMLAnchorElement).href
+            }
+
+            // If it's a button, consider submitting a form
+            if (
+              element.tagName.toLowerCase() === "button" ||
+              (element.tagName.toLowerCase() === "input" &&
+                (element as HTMLInputElement).type === "submit")
+            ) {
+              const form = element.closest("form")
+              if (form) form.submit()
+            }
           } else {
             console.error("Element not found for selector:", selector)
           }
@@ -311,48 +356,51 @@ class Tab {
           if (input) {
             console.log("Input element found, focusing")
             input.focus()
-            // Optional: Scroll the element into view
             input.scrollIntoView()
-            console.log("Entering value:", value)
-            // Clear any existing value
+
+            // Clear existing value
             input.value = ""
+            input.dispatchEvent(new Event("input", { bubbles: true }))
+            input.dispatchEvent(new Event("change", { bubbles: true }))
 
-            const typeCharacter = (char: string, index: number) => {
-              const charCode = char.charCodeAt(0)
-              const eventOptions = {
-                key: char,
-                code: `Key${char.toUpperCase()}`,
-                charCode: charCode,
-                keyCode: charCode,
-                which: charCode,
-                bubbles: true
-              }
-              // Dispatch keydown event
-              input.dispatchEvent(new KeyboardEvent("keydown", eventOptions))
-              // Dispatch keypress event
-              input.dispatchEvent(new KeyboardEvent("keypress", eventOptions))
-              // Update the value
-              input.value += char
-              // Dispatch input event
-              input.dispatchEvent(new InputEvent("input", { bubbles: true }))
-              // Dispatch keyup event
-              input.dispatchEvent(new KeyboardEvent("keyup", eventOptions))
+            console.log("Existing value cleared, waiting before typing")
 
-              if (index < value.length - 1) {
-                setTimeout(
-                  () => typeCharacter(value[index + 1], index + 1),
-                  200
-                ) // 200ms delay between keystrokes
-              } else {
-                console.log("Dispatching change event")
-                input.dispatchEvent(new Event("change", { bubbles: true }))
-              }
-            }
-
-            // Wait 500ms before starting to type
             setTimeout(() => {
+              console.log("Starting to enter new value:", value)
+              const typeCharacter = (char: string, index: number) => {
+                const charCode = char.charCodeAt(0)
+                const eventOptions = {
+                  key: char,
+                  code: `Key${char.toUpperCase()}`,
+                  charCode: charCode,
+                  keyCode: charCode,
+                  which: charCode,
+                  bubbles: true
+                }
+                // Dispatch keydown event
+                input.dispatchEvent(new KeyboardEvent("keydown", eventOptions))
+                // Dispatch keypress event
+                input.dispatchEvent(new KeyboardEvent("keypress", eventOptions))
+                // Update the value
+                input.value += char
+                // Dispatch input event
+                input.dispatchEvent(new InputEvent("input", { bubbles: true }))
+                // Dispatch keyup event
+                input.dispatchEvent(new KeyboardEvent("keyup", eventOptions))
+
+                if (index < value.length - 1) {
+                  setTimeout(
+                    () => typeCharacter(value[index + 1], index + 1),
+                    20
+                  )
+                } else {
+                  console.log("Dispatching change event")
+                  input.dispatchEvent(new Event("change", { bubbles: true }))
+                }
+              }
+
               typeCharacter(value[0], 0)
-            }, 500)
+            }, 1000) // Wait 1 second before starting to type
           } else {
             console.error("Input element not found for selector:", selector)
           }
@@ -388,8 +436,8 @@ class Tab {
       result = await this._dendriteClient.scrapePage({
         page_information: pageInfo,
         llm_config: {
-          openai_api_key: this.openaiApiKey,
-          anthropic_api_key: this.anthropicApiKey
+          openai_api_key: openaiApiKey,
+          anthropic_api_key: anthropicApiKey
         },
         prompt,
         return_data_json_schema: typeSpec,
@@ -397,7 +445,6 @@ class Tab {
         use_cache: useCache,
         force_use_cache: false
       })
-      console.log("Extract result:", result)
     } catch (error) {
       if (error instanceof Error) {
         console.error(`Failed to scrape page: ${error.message}`)
@@ -407,21 +454,20 @@ class Tab {
         throw new Error("An unexpected error occurred during page scraping")
       }
     }
-    return result
+    console.log("Extract result:", result.return_data)
+    return result.return_data
   }
 
-  async ask(prompt: string, typeSpec?: any): Promise<any> {
+  async ask(prompt: string, typeSpec?: any, asJson = false): Promise<any> {
     if (this._stop) throw new Error("Agent stopped") // Check stop flag
     console.log("Ask action with prompt:", prompt, "and typeSpec:", typeSpec)
-    console.log("OpenAI API Key in ask:", this.openaiApiKey)
-    console.log("Anthropic API Key in ask:", this.anthropicApiKey)
     const pageInfo = await this.getPageInformation()
     const dto = {
       prompt,
       page_information: pageInfo,
       llm_config: {
-        openai_api_key: this.openaiApiKey,
-        anthropic_api_key: this.anthropicApiKey
+        openai_api_key: openaiApiKey,
+        anthropic_api_key: anthropicApiKey
       },
       return_schema: {
         type: "string"
@@ -429,8 +475,15 @@ class Tab {
     }
     console.log("Ask DTO:", dto)
     const result = await this._dendriteClient.askPage(dto)
-    console.log("Ask result:", result)
-    return result
+    console.log("Ask result:", result.return_data)
+    if (asJson) {
+      try {
+        return JSON.parse(result.return_data)
+      } catch (error) {
+        console.error("Failed to parse result as JSON:", error)
+        throw new Error("Failed to parse result as JSON")
+      }
+    }
   }
 
   // Method to focus on the active tab
@@ -479,67 +532,275 @@ const startAgentHandler: PlasmoMessaging.MessageHandler = async (req, res) => {
   try {
     console.log("Handler received request:", req.body)
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true })
+    const dendriteTab = new Tab(tab.id)
 
-    const query = encodeURIComponent(req.body.itemDescription)
-    const lowPrice = encodeURIComponent(req.body.priceRangeMin)
-    const highPrice = encodeURIComponent(req.body.priceRangeMax)
+    switch (req.body.type) {
+      case "get-listings":
+        console.log("Starting get-listings process")
 
-    const dendriteTab = new Tab(
-      tab.id,
-      req.body.dendriteApiKey,
-      req.body.openaiApiKey,
-      req.body.anthropicApiKey
-    )
+        const openai = new OpenAI({
+          apiKey: openaiApiKey
+        })
 
-    await dendriteTab.goto(
-      `https://www.facebook.com/marketplace/search/minPrice=${lowPrice}&maxPrice=${highPrice}}?query=${query}`
-    )
-    const data = await dendriteTab.extract(
-      "get all the items as a list of objects with the following keys: {url, price, description, imageUrl}",
-      {
-        type: "array",
-        items: {
-          type: "object",
-          properties: {
-            url: { type: "string", description: "The URL to the listing page" },
-            price: {
-              type: "number",
-              description: "Include the currency symbol in the price"
-            },
-            description: {
-              type: "string",
-              description: "The name and description of the item as one string"
-            },
-            imageUrl: {
-              type: "string",
-              description: "The URL to the image of the item"
-            }
-          }
+        const optimizeQuery = async (query: string): Promise<string> => {
+          const response = await openai.chat.completions.create({
+            model: "gpt-3.5-turbo",
+            messages: [
+              {
+                role: "system",
+                content:
+                  "You are a helpful assistant that optimizes search queries for Facebook Marketplace. Keep the query concise and focused on the main items."
+              },
+              {
+                role: "user",
+                content: `Optimize this search query for Facebook Marketplace: "${query}"`
+              }
+            ],
+            max_tokens: 50
+          })
+          return response.choices[0].message.content.trim()
         }
-      }
-    )
 
-    // send to /rank
+        const optimizedQuery = await optimizeQuery(req.body.itemDescription)
+        console.log(`Original query: ${req.body.itemDescription}`)
+        console.log(`Optimized query: ${optimizedQuery}`)
 
-    // get urls back
+        const itemDescription = encodeURIComponent(optimizedQuery)
+        const lowPrice = String(req.body.priceRangeMin).trim()
+        const highPrice = String(req.body.priceRangeMax).trim()
+        console.log(
+          `Search parameters: ${itemDescription}, ${lowPrice}-${highPrice}`
+        )
 
-    // visit each url
+        console.log("Fetching all listings")
+        const allListings = await getAllListings(
+          dendriteTab,
+          itemDescription,
+          lowPrice,
+          highPrice
+        )
+        console.log(`Found ${allListings.length} listings`)
 
-    // extract data
+        // const rankedListings = await rankItems(allListings)
+        // console.log(`Ranked ${rankedListings.length} listings`)
 
-    //
+        // console.log("Fetching details for top listings")
+        // const listingsWithDetails = []
+        // for (let i = 0; i < 4 && i < rankedListings.length; i++) {
+        //   const listing = rankedListings[i]
+        //   console.log(`Fetching details for listing ${i + 1}: ${listing.url}`)
+        //   const allInfoResponse = await getListingDetails(
+        //     dendriteTab,
+        //     listing.url
+        //   )
+        //   listingsWithDetails.push({
+        //     ...listing,
+        //     ...allInfoResponse
+        //   })
+        // }
+        console.log(`Fetched details for ${allListings.length} listings`)
 
-    res.send({
-      message: "Page information captured and analyzed successfully",
-      data
-    })
+        console.log("Listings with details:", allListings)
+
+        res.send({
+          message: "Page information captured and analyzed successfully",
+          allListings: allListings
+        })
+        console.log("Response sent to client")
+        break
+
+      case "start-chat":
+        const sellerName = await startChat(
+          dendriteTab,
+          req.body.listingPageUrl,
+          req.body.message
+        )
+        res.send({
+          message: "Chat initiated successfully",
+          sellerName
+        })
+        break
+
+      case "negotiate":
+        console.log("Testing getChat function")
+        const itemDescription2 = req.body.itemDescription
+        const listing = req.body.listing
+        console.log(listing)
+
+        try {
+          const message = await getChat(dendriteTab, listing, itemDescription2)
+          console.log("message: ", message)
+          console.log("getChat executed successfully")
+          console.log("Updated mockItem:", listing)
+          res.send({
+            message: "getChat test completed successfully",
+            updatedItem: listing
+          })
+        } catch (error) {
+          console.error("Error in getChat:", error)
+          res.send({
+            message: "Error in getChat test",
+            error: error.message
+          })
+        }
+        break
+
+      default:
+        throw new Error("Invalid request type")
+    }
   } catch (error) {
     console.error("Error in handler:", error)
     res.send({
-      message: "Error capturing or analyzing page information",
+      message: "Error processing request",
       error: error.message
     })
   }
 }
 
+const getAllListings = async (
+  dendriteTab: Tab,
+  itemDescription: string,
+  lowPrice: string,
+  highPrice: string
+) => {
+  await dendriteTab.goto(
+    `https://www.facebook.com/marketplace/search/minPrice=${lowPrice}&maxPrice=${highPrice}}?query=${itemDescription}`
+  )
+  const allListings = await dendriteTab.extract(
+    "get all the items as a list of objects with the following keys: {url, price, description, imageUrl}",
+    {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          url: { type: "string", description: "The URL to the listing page" },
+          price: {
+            type: "number",
+            description: "Include the currency symbol in the price"
+          },
+          description: {
+            type: "string",
+            description: "The name and description of the item as one string"
+          },
+          imageUrl: {
+            type: "string",
+            description: "The URL to the image of the item"
+          }
+        }
+      }
+    }
+  )
+  console.log(JSON.stringify(allListings, null, 2))
+  return allListings
+}
+
+const getListingDetails = async (dendriteTab: Tab, url: string) => {
+  await dendriteTab.goto(url)
+  const listingDetails = await dendriteTab.extract(
+    "return a dict with the listed information from the current page (needs to be general for any marketplace page so just return the informational text) ",
+    {
+      type: "object",
+      properties: {
+        allInfo: {
+          type: "string"
+        }
+      }
+    }
+  )
+  return listingDetails
+}
+
+const startChat = async (
+  dendriteTab: Tab,
+  listingPageUrl: string,
+  message: string
+) => {
+  await dendriteTab.goto(listingPageUrl)
+
+  await dendriteTab.click("the send message to seller button.")
+  // const sellerName = await dendriteTab.ask("what is the name of the seller?", {
+  //   type: "string"
+  // })
+  await new Promise((resolve) => setTimeout(resolve, 2000))
+  await dendriteTab.fill("the message input to send the seller", message)
+  await dendriteTab.click("the send message button")
+}
+
+const getChat = async (dendriteTab: Tab, listing, itemDescription: string) => {
+  console.log("Starting getChat function")
+  console.log("Listing:", listing)
+  console.log("Item Description:", itemDescription)
+
+  const chatUrl = "https://www.facebook.com/messages/t/8356454774449075"
+  console.log("Navigating to chat URL:", chatUrl)
+  await dendriteTab.goto(chatUrl)
+
+  class Message {
+    role: string
+    content: string
+  }
+
+  class ChatRequest {
+    context: string
+    item_description: string
+    chat_history: Message[]
+  }
+
+  console.log("Waiting for 2 seconds before extracting messages")
+  await new Promise((resolve) => setTimeout(resolve, 2000))
+
+  console.log("Extracting conversation messages")
+  const messages = await dendriteTab.ask(
+    "Extract the conversation messages from this page. For each message, identify if it's from 'you' (blue messages) or the 'seller'. Format the output as an array of objects, where each object has 'role' (either 'you' or 'seller') and 'content' properties. Only list what is actually on the page.",
+    {
+      type: "array",
+      items: {
+        type: "object",
+        properties: { role: { type: "string" }, content: { type: "string" } }
+      }
+    },
+    true
+  )
+  console.log("Extracted messages:", messages)
+
+  const chatRequest: ChatRequest = {
+    context: listing.description,
+    item_description: itemDescription,
+    chat_history: JSON.parse(JSON.stringify(messages))
+  }
+  console.log("Prepared chat request:", chatRequest)
+
+  console.log("Sending chat request to AI")
+  const response = await chatWithAI(chatRequest)
+  console.log("AI response:", response.content)
+
+  console.log("Clicking message input")
+  await dendriteTab.click(
+    "the message input to send a message, has the placeholder Aa"
+  )
+
+  console.log("Filling message input with AI response")
+  await dendriteTab.fill(
+    "the message input to send a message, has the placeholder Aa",
+    response.content
+  )
+
+  console.log("getChat function completed")
+}
+
 export default startAgentHandler
+
+async function getAllListingsFB(
+  dendriteTab,
+  itemDescription,
+  lowPrice,
+  highPrice
+) {
+  await dendriteTab.goto(
+    `https://www.facebook.com/marketplace/search/minPrice=${lowPrice}&maxPrice=${highPrice}}?query=${itemDescription}`
+  )
+  const allListings = await dendriteTab.extract(
+    "get all the items as a list of objects with the following keys: {url, price, description, imageUrl}"
+  )
+  return allListings
+}

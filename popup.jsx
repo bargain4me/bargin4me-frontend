@@ -82,8 +82,8 @@ const IndexPopup = () => {
   return (
     <div
       style={{
-        width: "300px",
-        height: "400px",
+        width: "400px",
+        height: "500px",
         margin: 0,
         padding: 0,
         overflow: "auto"

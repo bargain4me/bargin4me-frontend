@@ -16,12 +16,13 @@
     "@mui/material": "^6.1.0",
     "@plasmohq/messaging": "^0.6.2",
     "@supabase/supabase-js": "^2.45.4",
+    "openai": "^4.61.0",
     "plasmo": "0.89.2",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-loader-spinner": "^6.1.6",
-    "supabase": "^1.192.5",
-    "react-router-dom": "^6.26.2"
+    "react-router-dom": "^6.26.2",
+    "supabase": "^1.192.5"
   },
   "devDependencies": {
     "@ianvs/prettier-plugin-sort-imports": "4.1.1",

@@ -1,3 +1,5 @@
+import { dendriteApiKey } from "./secrets"
+
 export interface PageInformation {
   url: string
   raw_html: string
@@ -83,11 +85,9 @@ export interface GetElementResponse {
 
 export class DendriteClient {
   private baseUrl: string
-  private apiKey: string
 
-  constructor(baseUrl: string, apiKey: string) {
+  constructor(baseUrl: string) {
     this.baseUrl = baseUrl
-    this.apiKey = apiKey
   }
 
   private async request<T>(
@@ -98,7 +98,7 @@ export class DendriteClient {
     const url = `${this.baseUrl}${endpoint}`
     const headers = {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${this.apiKey}`
+      Authorization: `Bearer ${dendriteApiKey}`
     }
 
     try {

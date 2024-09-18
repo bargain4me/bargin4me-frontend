@@ -62,5 +62,74 @@ async function searchItem(
     return null // Return null or handle the error based on your application's requirements
   }
 }
+// Function to rank items
+async function rankItems(items) {
+  console.log("Ranking items:", items);
+  try {
+    const payload = {
+      request: "rank",
+      searchId: 15,
+      items: items
+    };
+    console.log("Payload:", payload);
+    const response = await fetch(
+      "https://d53503de-4a3d-4eb2-840a-bda4b5fea6e4-00-mpqny06oapwx.spock.replit.dev/rank",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        body: JSON.stringify(payload)
+      }
+    );
 
-export { fetchItemData, searchItem }
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
+
+    const rankedUrls = await response.json()
+    console.log("Ranked URLs:", rankedUrls)
+    
+    // Filter items based on the returned URLs
+    const filteredItems = items.filter(item => rankedUrls.includes(item.url));
+    console.log("Filtered items:", filteredItems)
+    
+    return filteredItems
+  } catch (error) {
+    console.error("Error ranking items:", error)
+    return null // Return null or handle the error based on your application's requirements
+  }
+}
+
+// Function to chat with the AI
+async function chatWithAI(chatRequest) {
+  console.log("Chatting with AI:", chatRequest);
+  try {
+    const response = await fetch(
+      "https://d53503de-4a3d-4eb2-840a-bda4b5fea6e4-00-mpqny06oapwx.spock.replit.dev/chat",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        body: JSON.stringify(chatRequest)
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log("Chat response:", data);
+    return data;
+  } catch (error) {
+    console.error("Error chatting with AI:", error);
+    
+    return null; // Return null or handle the error based on your application's requirements
+  }
+}
+
+export { fetchItemData, searchItem, rankItems, chatWithAI }
