@@ -36,9 +36,9 @@ import Listings from "./Listings"
 // ]
 
 const Home = ({ onLogout, onViewListing }) => {
-  const [itemDescription, setItemDescription] = useState("office chairs")
-  const [priceRangeMin, setPriceRangeMin] = useState("100")
-  const [priceRangeMax, setPriceRangeMax] = useState("1000")
+  const [itemDescription, setItemDescription] = useState("office chairs that is leather with armrest and must have wheels")
+  const [priceRangeMin, setPriceRangeMin] = useState("250")
+  const [priceRangeMax, setPriceRangeMax] = useState("300")
   const [loading, setLoading] = useState(false)
   const [errors, setErrors] = useState({})
   const [listings, setListings] = useState()

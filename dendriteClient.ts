@@ -87,7 +87,7 @@ export class DendriteClient {
   private baseUrl: string
 
   constructor(baseUrl: string) {
-    this.baseUrl = baseUrl
+    this.baseUrl = "https://dendrite-server.azurewebsites.net/api/v1/"
   }
 
   private async request<T>(

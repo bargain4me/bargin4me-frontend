@@ -418,6 +418,46 @@ class Tab {
     console.log("Fill action completed with selection and Enter key press")
   }
 
+  // async extract(
+  //   prompt: string,
+  //   typeSpec?: any,
+  //   useCache: boolean = true
+  // ): Promise<any> {
+  //   if (this._stop) throw new Error("Agent stopped") // Check stop flag
+  //   console.log(
+  //     "Extract action with prompt:",
+  //     prompt,
+  //     "and typeSpec:",
+  //     typeSpec
+  //   )
+  //   const pageInfo = await this.getPageInformation()
+  //   let result
+  //   try {
+  //     result = await this._dendriteClient.scrapePage({
+  //       page_information: pageInfo,
+  //       llm_config: {
+  //         openai_api_key: openaiApiKey,
+  //         anthropic_api_key: anthropicApiKey
+  //       },
+  //       prompt,
+  //       return_data_json_schema: typeSpec,
+  //       use_screenshot: true,
+  //       use_cache: useCache,
+  //       force_use_cache: false
+  //     })
+  //   } catch (error) {
+  //     if (error instanceof Error) {
+  //       console.error(`Failed to scrape page: ${error.message}`)
+  //       throw new Error(`Scrape page operation failed: ${error.message}`)
+  //     } else {
+  //       console.error("An unexpected error occurred during page scraping")
+  //       throw new Error("An unexpected error occurred during page scraping")
+  //     }
+  //   }
+  //   console.log("Extract result:", result.return_data)
+  //   return result.return_data
+  // }
+
   async extract(
     prompt: string,
     typeSpec?: any,
@@ -430,21 +470,47 @@ class Tab {
       "and typeSpec:",
       typeSpec
     )
+    
+    // Get the page information (you might want to mock this if needed)
     const pageInfo = await this.getPageInformation()
+    console.log("Page information before mock:", pageInfo)
     let result
+  
     try {
-      result = await this._dendriteClient.scrapePage({
-        page_information: pageInfo,
-        llm_config: {
-          openai_api_key: openaiApiKey,
-          anthropic_api_key: anthropicApiKey
-        },
-        prompt,
-        return_data_json_schema: typeSpec,
-        use_screenshot: true,
-        use_cache: useCache,
-        force_use_cache: false
-      })
+      // Use mock data here instead of calling the API
+      console.log("Using mock data for scrape-page");
+      result = {
+        status: "success",
+        message: "Mock scrape-page operation successful",
+        return_data: [
+          {
+            url: "https://www.facebook.com/marketplace/item/824800769763552/?ref=category_feed&referral_code=null&referral_story_type=post&tracking=browse_serp%3A7d6f864d-71db-4827-a1cb-acb247986365",
+            price: 275,
+            description: "Leather Office Chair",
+            imageUrl: "https://scontent.fyvr3-1.fna.fbcdn.net/v/t45.5328-4/456394372_385781187956570_6624431920298975482_n.jpg?stp=dst-jpg_s960x960&_nc_cat=107&ccb=1-7&_nc_sid=247b10&_nc_ohc=5T_USZRA0HoQ7kNvgHmhvlh&_nc_ht=scontent.fyvr3-1.fna&oh=00_AYBs2_yr44m6RmN3OZhPW1f6ScPnGSPnnDyDMe8oYYg6vw&oe=66F7B1FB"
+          },
+          {
+            url: "https://www.facebook.com/marketplace/item/1428097211209208/?ref=category_feed&referral_code=null&referral_story_type=post&tracking=browse_serp%3A7d6f864d-71db-4827-a1cb-acb247986365",
+            price: 200,
+            description: "Leather lazy boy desk chair",
+            imageUrl: "https://scontent.fyvr3-1.fna.fbcdn.net/v/t45.5328-4/459330866_3305483619760915_6137115522618168233_n.jpg?stp=dst-jpg_s960x960&_nc_cat=101&ccb=1-7&_nc_sid=247b10&_nc_ohc=GsOfStcoFOgQ7kNvgF_8IIq&_nc_ht=scontent.fyvr3-1.fna&_nc_gid=AV_MEbQHynpDd9nxerxrHay&oh=00_AYB6r_4WSFDSSqGv7s_q8MF6qLx9QGHyz6kiRwHF3Rcy_Q&oe=66F7ADC5"
+          },
+          {
+            url: "https://www.facebook.com/marketplace/item/481944984601763/?ref=category_feed&referral_code=null&referral_story_type=post&tracking=browse_serp%3A7d6f864d-71db-4827-a1cb-acb247986365",
+            price: 250,
+            description: "IKEA JÄRVFJÄLLET office chair",
+            imageUrl: "https://scontent.fyvr3-1.fna.fbcdn.net/v/t45.5328-4/458469319_863330535433683_3446302438299483216_n.jpg?stp=dst-jpg_p720x720&_nc_cat=106&ccb=1-7&_nc_sid=247b10&_nc_ohc=YZ3y1kpcBioQ7kNvgHMoGk2&_nc_ht=scontent.fyvr3-1.fna&_nc_gid=ABTA4tmcYthOiNbMvMGx3dC&oh=00_AYB6ZGU5LnPYw_GR7f7dh1-yJMpzSTrZHj1OdqlGBYXUvg&oe=66F78906"
+          },
+          {
+            url: "https://www.facebook.com/marketplace/item/1057574923035201/?ref=category_feed&referral_code=null&referral_story_type=post&tracking=browse_serp%3A7d6f864d-71db-4827-a1cb-acb247986365",
+            price: 300,
+            description: "Noble gaming chair",
+            imageUrl: "https://scontent.fyvr3-1.fna.fbcdn.net/v/t45.5328-4/459003086_1567979113801391_4356373057392762013_n.jpg?stp=dst-jpg_s960x960&_nc_cat=100&ccb=1-7&_nc_sid=247b10&_nc_ohc=NqRGTEg8T94Q7kNvgHbomRN&_nc_ht=scontent.fyvr3-1.fna&_nc_gid=AqKHiqqNGAMNxDD_KsChjFZ&oh=00_AYD8EohWvk5OBg6XAW65t-fFqBDypgSnpsJYu-ech_zNcA&oe=66F7A2A2"
+          }
+        ],
+        created_script: null,
+        used_cache: false
+      }
     } catch (error) {
       if (error instanceof Error) {
         console.error(`Failed to scrape page: ${error.message}`)
@@ -454,9 +520,14 @@ class Tab {
         throw new Error("An unexpected error occurred during page scraping")
       }
     }
+  
+    // Log the extracted result
     console.log("Extract result:", result.return_data)
+  
+    // Return the mock data to be used by your Chrome extension
     return result.return_data
   }
+  
 
   async ask(prompt: string, typeSpec?: any, asJson = false): Promise<any> {
     if (this._stop) throw new Error("Agent stopped") // Check stop flag
@@ -532,6 +603,7 @@ const startAgentHandler: PlasmoMessaging.MessageHandler = async (req, res) => {
   try {
     console.log("Handler received request:", req.body)
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true })
+    console.log("Tab ID:", tab.id)
     const dendriteTab = new Tab(tab.id)
 
     switch (req.body.type) {
@@ -543,6 +615,7 @@ const startAgentHandler: PlasmoMessaging.MessageHandler = async (req, res) => {
         })
 
         const optimizeQuery = async (query: string): Promise<string> => {
+          console.log("Optimizing query:", query)
           const response = await openai.chat.completions.create({
             model: "gpt-3.5-turbo",
             messages: [
@@ -558,7 +631,9 @@ const startAgentHandler: PlasmoMessaging.MessageHandler = async (req, res) => {
             ],
             max_tokens: 50
           })
-          return response.choices[0].message.content.trim()
+          const optimized = response.choices[0].message.content.trim()
+          console.log("Optimized query from cahtgpt:", optimized)
+          return optimized
         }
 
         const optimizedQuery = await optimizeQuery(req.body.itemDescription)
@@ -569,78 +644,71 @@ const startAgentHandler: PlasmoMessaging.MessageHandler = async (req, res) => {
         const lowPrice = String(req.body.priceRangeMin).trim()
         const highPrice = String(req.body.priceRangeMax).trim()
         console.log(
-          `Search parameters: ${itemDescription}, ${lowPrice}-${highPrice}`
+          `Search parameters: Item: ${itemDescription}, Min Price: ${lowPrice}, Max Price: ${highPrice}`
         )
 
-        console.log("Fetching all listings")
-        const allListings = await getAllListings(
-          dendriteTab,
-          itemDescription,
-          lowPrice,
-          highPrice
-        )
-        console.log(`Found ${allListings.length} listings`)
+        console.log("Fetching all listings with parameters...")
+        try {
+          const allListings = await getAllListings(
+            dendriteTab,
+            itemDescription,
+            lowPrice,
+            highPrice
+          )
+          console.log(`Found ${allListings.length} listings`)
+          console.log("Listings data:", JSON.stringify(allListings, null, 2))
 
-        // const rankedListings = await rankItems(allListings)
-        // console.log(`Ranked ${rankedListings.length} listings`)
+          res.send({
+            message: "Page information captured and analyzed successfully",
+            allListings: allListings
+          })
+          console.log("Response sent to client")
+        } catch (fetchError) {
+          console.error("Error during fetching listings:", fetchError)
+          res.send({ error: "Failed to fetch listings" })
+        }
 
-        // console.log("Fetching details for top listings")
-        // const listingsWithDetails = []
-        // for (let i = 0; i < 4 && i < rankedListings.length; i++) {
-        //   const listing = rankedListings[i]
-        //   console.log(`Fetching details for listing ${i + 1}: ${listing.url}`)
-        //   const allInfoResponse = await getListingDetails(
-        //     dendriteTab,
-        //     listing.url
-        //   )
-        //   listingsWithDetails.push({
-        //     ...listing,
-        //     ...allInfoResponse
-        //   })
-        // }
-        console.log(`Fetched details for ${allListings.length} listings`)
-
-        console.log("Listings with details:", allListings)
-
-        res.send({
-          message: "Page information captured and analyzed successfully",
-          allListings: allListings
-        })
-        console.log("Response sent to client")
         break
 
       case "start-chat":
-        const sellerName = await startChat(
-          dendriteTab,
-          req.body.listingPageUrl,
-          req.body.message
-        )
-        res.send({
-          message: "Chat initiated successfully",
-          sellerName
-        })
+        console.log("Starting chat with seller...")
+        try {
+          const sellerName = await startChat(
+            dendriteTab,
+            req.body.listingPageUrl,
+            req.body.message
+          )
+          console.log("Chat started with seller:", sellerName)
+          res.send({
+            message: "Chat initiated successfully",
+            sellerName
+          })
+        } catch (chatError) {
+          console.error("Error during chat initiation:", chatError)
+          res.send({ error: "Failed to initiate chat" })
+        }
         break
 
       case "negotiate":
         console.log("Testing getChat function")
         const itemDescription2 = req.body.itemDescription
         const listing = req.body.listing
-        console.log(listing)
+        console.log("Listing:", listing)
 
         try {
           const message = await getChat(dendriteTab, listing, itemDescription2)
-          console.log("message: ", message)
+          console.log("message:", message)
           console.log("getChat executed successfully")
-          console.log("Updated mockItem:", listing)
+          console.log("Updated listing:", listing)
           res.send({
             message: "getChat test completed successfully",
             updatedItem: listing
           })
-        } catch (error) {
-          console.error("Error in getChat:", error)
+        } catch (negotiationError) {
+          console.error("Error in getChat:", negotiationError)
           res.send({
             message: "Error in getChat test",
-            error: error.message
+            error: negotiationError.message
           })
         }
         break
