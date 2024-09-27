@@ -339,15 +339,23 @@ class Tab {
     expectedOutcome?: string
   ): Promise<any> {
     if (this._stop) throw new Error("Agent stopped") // Check stop flag
+
     console.log("Fill action started with prompt:", prompt, "and value:", value)
+
+    // Optionally, you can keep the element response logic if needed
     const elementResponse = await this.get_element(prompt)
+    console.log("Value", value)
 
-    if (elementResponse.selectors && elementResponse.selectors.length >= 1) {
-      console.log(
-        "Element found for fill action:",
-        elementResponse.selectors[0]
-      )
+    console.log("FILL Element response:", elementResponse)
 
+    // Hardcoded selector for the textarea element
+    const hardcodedSelector =
+      "textarea.x1i10hfl.xggy1nq.x1s07b3s.xjbqb8w.x1ejq31n.xd10rxx.x1sy0etr.x17r0tee.x9f619.xzsf02u.x78zum5.x1jchvi3.x1fcty0u.x1a2a7pz.x6ikm8r.x1pi30zi.x1swvt13.xtt52l0.xh8yej3.x1ls7aod.xcrlgei.x1byulpo.x1agbcgv.x15bjb6t"
+
+    // Use hardcoded selector instead of the one from get_element
+    const selectorToUse = hardcodedSelector
+
+    try {
       await chrome.scripting.executeScript({
         target: { tabId: this._tabId },
         func: (selector, value) => {
@@ -405,18 +413,106 @@ class Tab {
             console.error("Input element not found for selector:", selector)
           }
         },
-        args: [elementResponse.selectors[0], value]
+        args: [selectorToUse, value] // Use hardcoded selector and value
       })
       console.log(
         "Element filled successfully, selected, and Enter key pressed:",
-        elementResponse.selectors[0]
+        selectorToUse
       )
-    } else {
-      console.error("Element not found for fill action with prompt:", prompt)
-      throw new Error("Element not found for fill action")
+    } catch (error) {
+      console.error("Error during chrome.scripting.executeScript:", error)
+      throw error // Rethrow to let the caller know
     }
+
     console.log("Fill action completed with selection and Enter key press")
   }
+
+  // async fill(
+  //   prompt: string,
+  //   value: string,
+  //   expectedOutcome?: string
+  // ): Promise<any> {
+  //   if (this._stop) throw new Error("Agent stopped") // Check stop flag
+  //   console.log("Fill action started with prompt:", prompt, "and value:", value)
+  //   const elementResponse = await this.get_element(prompt)
+  //   console.log("Value", value)
+
+  //   console.log("FILL Element response:", elementResponse)
+  //   if (elementResponse.selectors && elementResponse.selectors.length >= 1) {
+  //     console.log(
+  //       "Element found for fill action:",
+  //       elementResponse.selectors[0]
+  //     )
+
+  //     await chrome.scripting.executeScript({
+  //       target: { tabId: this._tabId },
+  //       func: (selector, value) => {
+  //         console.log("Executing fill script for selector:", selector)
+  //         const input = document.querySelector(selector) as HTMLInputElement
+  //         if (input) {
+  //           console.log("Input element found, focusing")
+  //           input.focus()
+  //           input.scrollIntoView()
+
+  //           // Clear existing value
+  //           input.value = ""
+  //           input.dispatchEvent(new Event("input", { bubbles: true }))
+  //           input.dispatchEvent(new Event("change", { bubbles: true }))
+
+  //           console.log("Existing value cleared, waiting before typing")
+
+  //           setTimeout(() => {
+  //             console.log("Starting to enter new value:", value)
+  //             const typeCharacter = (char: string, index: number) => {
+  //               const charCode = char.charCodeAt(0)
+  //               const eventOptions = {
+  //                 key: char,
+  //                 code: `Key${char.toUpperCase()}`,
+  //                 charCode: charCode,
+  //                 keyCode: charCode,
+  //                 which: charCode,
+  //                 bubbles: true
+  //               }
+  //               // Dispatch keydown event
+  //               input.dispatchEvent(new KeyboardEvent("keydown", eventOptions))
+  //               // Dispatch keypress event
+  //               input.dispatchEvent(new KeyboardEvent("keypress", eventOptions))
+  //               // Update the value
+  //               input.value += char
+  //               // Dispatch input event
+  //               input.dispatchEvent(new InputEvent("input", { bubbles: true }))
+  //               // Dispatch keyup event
+  //               input.dispatchEvent(new KeyboardEvent("keyup", eventOptions))
+
+  //               if (index < value.length - 1) {
+  //                 setTimeout(
+  //                   () => typeCharacter(value[index + 1], index + 1),
+  //                   20
+  //                 )
+  //               } else {
+  //                 console.log("Dispatching change event")
+  //                 input.dispatchEvent(new Event("change", { bubbles: true }))
+  //               }
+  //             }
+
+  //             typeCharacter(value[0], 0)
+  //           }, 1000) // Wait 1 second before starting to type
+  //         } else {
+  //           console.error("Input element not found for selector:", selector)
+  //         }
+  //       },
+  //       args: [elementResponse.selectors[0], value]
+  //     })
+  //     console.log(
+  //       "Element filled successfully, selected, and Enter key pressed:",
+  //       elementResponse.selectors[0]
+  //     )
+  //   } else {
+  //     console.error("Element not found for fill action with prompt:", prompt)
+  //     throw new Error("Element not found for fill action")
+  //   }
+  //   console.log("Fill action completed with selection and Enter key press")
+  // }
 
   // async extract(
   //   prompt: string,
@@ -470,15 +566,15 @@ class Tab {
       "and typeSpec:",
       typeSpec
     )
-    
+
     // Get the page information (you might want to mock this if needed)
     const pageInfo = await this.getPageInformation()
     console.log("Page information before mock:", pageInfo)
     let result
-  
+
     try {
       // Use mock data here instead of calling the API
-      console.log("Using mock data for scrape-page");
+      console.log("Using mock data for scrape-page")
       result = {
         status: "success",
         message: "Mock scrape-page operation successful",
@@ -487,30 +583,35 @@ class Tab {
             url: "https://www.facebook.com/marketplace/item/824800769763552/?ref=category_feed&referral_code=null&referral_story_type=post&tracking=browse_serp%3A7d6f864d-71db-4827-a1cb-acb247986365",
             price: 275,
             description: "Leather Office Chair",
-            imageUrl: "https://scontent.fyvr3-1.fna.fbcdn.net/v/t45.5328-4/456394372_385781187956570_6624431920298975482_n.jpg?stp=dst-jpg_s960x960&_nc_cat=107&ccb=1-7&_nc_sid=247b10&_nc_ohc=5T_USZRA0HoQ7kNvgHmhvlh&_nc_ht=scontent.fyvr3-1.fna&oh=00_AYBs2_yr44m6RmN3OZhPW1f6ScPnGSPnnDyDMe8oYYg6vw&oe=66F7B1FB"
+            imageUrl:
+              "https://scontent.fyvr3-1.fna.fbcdn.net/v/t45.5328-4/456394372_385781187956570_6624431920298975482_n.jpg?stp=dst-jpg_s960x960&_nc_cat=107&ccb=1-7&_nc_sid=247b10&_nc_ohc=5T_USZRA0HoQ7kNvgHmhvlh&_nc_ht=scontent.fyvr3-1.fna&oh=00_AYBs2_yr44m6RmN3OZhPW1f6ScPnGSPnnDyDMe8oYYg6vw&oe=66F7B1FB"
           },
           {
             url: "https://www.facebook.com/marketplace/item/1428097211209208/?ref=category_feed&referral_code=null&referral_story_type=post&tracking=browse_serp%3A7d6f864d-71db-4827-a1cb-acb247986365",
             price: 200,
             description: "Leather lazy boy desk chair",
-            imageUrl: "https://scontent.fyvr3-1.fna.fbcdn.net/v/t45.5328-4/459330866_3305483619760915_6137115522618168233_n.jpg?stp=dst-jpg_s960x960&_nc_cat=101&ccb=1-7&_nc_sid=247b10&_nc_ohc=GsOfStcoFOgQ7kNvgF_8IIq&_nc_ht=scontent.fyvr3-1.fna&_nc_gid=AV_MEbQHynpDd9nxerxrHay&oh=00_AYB6r_4WSFDSSqGv7s_q8MF6qLx9QGHyz6kiRwHF3Rcy_Q&oe=66F7ADC5"
+            imageUrl:
+              "https://scontent.fyvr3-1.fna.fbcdn.net/v/t45.5328-4/459330866_3305483619760915_6137115522618168233_n.jpg?stp=dst-jpg_s960x960&_nc_cat=101&ccb=1-7&_nc_sid=247b10&_nc_ohc=GsOfStcoFOgQ7kNvgF_8IIq&_nc_ht=scontent.fyvr3-1.fna&_nc_gid=AV_MEbQHynpDd9nxerxrHay&oh=00_AYB6r_4WSFDSSqGv7s_q8MF6qLx9QGHyz6kiRwHF3Rcy_Q&oe=66F7ADC5"
           },
           {
             url: "https://www.facebook.com/marketplace/item/481944984601763/?ref=category_feed&referral_code=null&referral_story_type=post&tracking=browse_serp%3A7d6f864d-71db-4827-a1cb-acb247986365",
             price: 250,
             description: "IKEA JÄRVFJÄLLET office chair",
-            imageUrl: "https://scontent.fyvr3-1.fna.fbcdn.net/v/t45.5328-4/458469319_863330535433683_3446302438299483216_n.jpg?stp=dst-jpg_p720x720&_nc_cat=106&ccb=1-7&_nc_sid=247b10&_nc_ohc=YZ3y1kpcBioQ7kNvgHMoGk2&_nc_ht=scontent.fyvr3-1.fna&_nc_gid=ABTA4tmcYthOiNbMvMGx3dC&oh=00_AYB6ZGU5LnPYw_GR7f7dh1-yJMpzSTrZHj1OdqlGBYXUvg&oe=66F78906"
+            imageUrl:
+              "https://scontent.fyvr3-1.fna.fbcdn.net/v/t45.5328-4/458469319_863330535433683_3446302438299483216_n.jpg?stp=dst-jpg_p720x720&_nc_cat=106&ccb=1-7&_nc_sid=247b10&_nc_ohc=YZ3y1kpcBioQ7kNvgHMoGk2&_nc_ht=scontent.fyvr3-1.fna&_nc_gid=ABTA4tmcYthOiNbMvMGx3dC&oh=00_AYB6ZGU5LnPYw_GR7f7dh1-yJMpzSTrZHj1OdqlGBYXUvg&oe=66F78906"
           },
           {
             url: "https://www.facebook.com/marketplace/item/1057574923035201/?ref=category_feed&referral_code=null&referral_story_type=post&tracking=browse_serp%3A7d6f864d-71db-4827-a1cb-acb247986365",
             price: 300,
             description: "Noble gaming chair",
-            imageUrl: "https://scontent.fyvr3-1.fna.fbcdn.net/v/t45.5328-4/459003086_1567979113801391_4356373057392762013_n.jpg?stp=dst-jpg_s960x960&_nc_cat=100&ccb=1-7&_nc_sid=247b10&_nc_ohc=NqRGTEg8T94Q7kNvgHbomRN&_nc_ht=scontent.fyvr3-1.fna&_nc_gid=AqKHiqqNGAMNxDD_KsChjFZ&oh=00_AYD8EohWvk5OBg6XAW65t-fFqBDypgSnpsJYu-ech_zNcA&oe=66F7A2A2"
+            imageUrl:
+              "https://scontent.fyvr3-1.fna.fbcdn.net/v/t45.5328-4/459003086_1567979113801391_4356373057392762013_n.jpg?stp=dst-jpg_s960x960&_nc_cat=100&ccb=1-7&_nc_sid=247b10&_nc_ohc=NqRGTEg8T94Q7kNvgHbomRN&_nc_ht=scontent.fyvr3-1.fna&_nc_gid=AqKHiqqNGAMNxDD_KsChjFZ&oh=00_AYD8EohWvk5OBg6XAW65t-fFqBDypgSnpsJYu-ech_zNcA&oe=66F7A2A2"
           }
         ],
         created_script: null,
         used_cache: false
       }
+      console.log("Mock scrape-page result:", result)
     } catch (error) {
       if (error instanceof Error) {
         console.error(`Failed to scrape page: ${error.message}`)
@@ -520,14 +621,13 @@ class Tab {
         throw new Error("An unexpected error occurred during page scraping")
       }
     }
-  
+
     // Log the extracted result
     console.log("Extract result:", result.return_data)
-  
+
     // Return the mock data to be used by your Chrome extension
     return result.return_data
   }
-  
 
   async ask(prompt: string, typeSpec?: any, asJson = false): Promise<any> {
     if (this._stop) throw new Error("Agent stopped") // Check stop flag
