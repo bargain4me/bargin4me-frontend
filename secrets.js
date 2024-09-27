@@ -1,4 +1,0 @@
-// secrets.js
-export const anthropicApiKey = "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";
-export const openaiApiKey = "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";
-export const dendriteApiKey = "sk_e071469d50ab300410d351c8fee8a56bb63ce4b3ae55e4c75b8b4dfe0bb65116"; 
