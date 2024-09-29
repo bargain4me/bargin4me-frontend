@@ -31,5 +31,8 @@ dist/
 # plasmo
 .plasmo
 
+secrets.js
+.env
+
 # typescript
 .tsbuildinfo
